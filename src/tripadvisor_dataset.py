@@ -52,6 +52,22 @@ def lem_data(data, name, lemmatizer=None):
         cleaned_data_title = [word for word in without_single_chr if not word.isnumeric()]
         var.append(cleaned_data_title)
     data[name] = var
+
+def make_sentences(data, name):
+    data[name]=data[name].apply(lambda x:' '.join([i+' ' for i in x]))
+    # Removing double spaces if created
+    data[name]=data[name].apply(lambda x:re.sub(r'\s+', ' ', x, flags=re.I))
+
+def sentiment(rating):
+    pos = [5]
+    neg = [1, 2]
+    neu = [3, 4]
+    if rating in pos:
+        return 2
+    elif rating in neg:
+        return 0
+    else:
+        return 1 
     
 
 class SentimentDataset(Dataset):

@@ -1,0 +1,13 @@
+numpy
+regex
+nltk
+wordcloud
+matplotlib
+seaborn
+pandas
+scikit-learn
+imblearn
+--find-links https://download.pytorch.org/whl/torch_stable.html
+torch==1.8.0+cu111
+jupyterlab
+

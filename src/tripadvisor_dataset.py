@@ -6,6 +6,7 @@ import torch
 from torch.utils.data.dataset import Dataset
 from torch.nn.utils.rnn import pad_sequence
 
+## Data Preprocessing
 def stopwords_removal(stopwords, sentence):
     return [word for word in nltk.word_tokenize(sentence) if word not in stopwords]
 
@@ -17,7 +18,7 @@ def clean_data(data, name):
     # Remove the links from the text
     data[name]=data[name].apply(lambda x:re.sub(r"http\S+", "", x))
     # Remove the twitter handlers
-    data[name]=data[name].apply(lambda x:re.sub('@[^\s]+','',x))
+    data[name]=data[name].apply(lambda x:re.sub(r'@[^\s]+','',x))
     # Remove the Special characters from the text 
     data[name]=data[name].apply(lambda x:' '.join(re.findall(r'\w+', x)))
     # Remove all the single characters in the text
@@ -61,7 +62,7 @@ def make_sentences(data, name):
 def sentiment(rating):
     pos = [5]
     neg = [1, 2]
-    neu = [3, 4]
+    # neu = [3, 4]
     if rating in pos:
         return 2
     elif rating in neg:
@@ -69,7 +70,7 @@ def sentiment(rating):
     else:
         return 1 
     
-
+## LSTM Sentiment Analysis 
 class SentimentDataset(Dataset):
     def __init__(self, data):
         """

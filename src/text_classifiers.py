@@ -1,4 +1,3 @@
-import torch
 import torch.nn as nn
 from torch.nn.utils.rnn import pack_padded_sequence
 
@@ -46,15 +45,9 @@ class RNNClassifier(nn.Module):
             output: A tensor of size (batch_size, nb_classes) represents the probabilities of being
                 positive, i.e. in range (0, 1)
         """
-        # device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
-        # device = torch.device('cpu')
         embeds = self.embedding(sequence)
         if lengths is not None:
             embeds = pack_padded_sequence(embeds, lengths)
-
-        # Set initial states
-        # h0 = torch.zeros(self.hparams['n_layers'], sequence.size(-1), self.hparams['hidden_size'])  
-        # c0 = torch.zeros(self.hparams['n_layers'], sequence.size(-1), self.hparams['hidden_size'])
         
         if self.hparams['use_lstm']:
             _, (h, _) = self.rnn(embeds)

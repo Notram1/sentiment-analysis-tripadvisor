@@ -1,3 +1,4 @@
+import torch
 import torch.nn as nn
 from torch.nn.utils.rnn import pack_padded_sequence
 
@@ -36,8 +37,8 @@ class RNNClassifier(nn.Module):
         else:
             raise ValueError('Unknown recurrent layer type given!')    
 
-        # self.dropout = nn.Dropout(0.3)                
-        self.fc = nn.Linear(in_features=hidden_size, out_features=additional_kwargs['output_size'])
+        self.dropout = nn.Dropout(additional_kwargs['dropout'])                
+        self.fc = nn.Linear(in_features=hidden_size*2 if additional_kwargs['bidirectional'] else hidden_size, out_features=additional_kwargs['output_size'])
             
 
     def forward(self, sequence, lengths=None):
@@ -52,16 +53,30 @@ class RNNClassifier(nn.Module):
                 positive, i.e. in range (0, 1)
         """
         embeds = self.embedding(sequence)
+        embeds = self.dropout(embeds)
         if lengths is not None:
-            embeds = pack_padded_sequence(embeds, lengths)
+            embeds = pack_padded_sequence(embeds, lengths, enforce_sorted=True)
         
         if self.hparams['rnn_type'] == 'lstm':
             _, (h, _) = self.rnn(embeds)
         else:
             _, h  = self.rnn(embeds)
-        
-        # h = self.dropout(h)
-        h = h.mean(0) # calculate mean across layers
-        output = self.fc(h)
 
-        return output
+        if self.rnn.bidirectional:
+            h = torch.cat([h[-1,:,:], h[-2,:,:]], dim=1)           
+        else:
+            h = h[-1]
+
+        h = self.dropout(h)
+        return self.fc(h) 
+
+def initialize_weights(m):
+    if isinstance(m, nn.Linear):
+        nn.init.xavier_normal_(m.weight)
+        nn.init.zeros_(m.bias)
+    elif isinstance(m, nn.RNN) or isinstance(m, nn.LSTM) or isinstance(m, nn.GRU):
+        for name, param in m.named_parameters():
+            if 'bias' in name:
+                nn.init.zeros_(param)
+            elif 'weight' in name:
+                nn.init.orthogonal_(param)

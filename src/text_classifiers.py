@@ -3,13 +3,13 @@ from torch.nn.utils.rnn import pack_padded_sequence
 
 
 class RNNClassifier(nn.Module):
-    def __init__(self, num_embeddings, embedding_dim, hidden_size, use_lstm=True, **additional_kwargs):
+    def __init__(self, num_embeddings, embedding_dim, hidden_size, rnn_type, **additional_kwargs):
         """
         Inputs:
             num_embeddings: size of the vocabulary
             embedding_dim: size of an embedding vector
             hidden_size: hidden_size of the rnn layer
-            use_lstm: use LSTM if True, vanilla RNN if false, default=True
+            rnn_type: use vanilla RNN, LSTM or GRU
         """
         super().__init__()
 
@@ -18,20 +18,26 @@ class RNNClassifier(nn.Module):
             'num_embeddings': num_embeddings,
             'embedding_dim': embedding_dim,
             'hidden_size': hidden_size,
-            'use_lstm': use_lstm,
+            'rnn_type': rnn_type,
             **additional_kwargs
         }
         
         self.embedding = nn.Embedding(self.hparams['num_embeddings'], self.hparams['embedding_dim'], padding_idx=0)
         
-        if use_lstm:
-            self.rnn = nn.LSTM(input_size=self.hparams['embedding_dim'], hidden_size=hidden_size, num_layers=additional_kwargs['n_layers'], dropout=additional_kwargs['dropout'])
+        if rnn_type == 'lstm':
+            self.rnn = nn.LSTM(input_size=self.hparams['embedding_dim'], hidden_size=hidden_size, num_layers=additional_kwargs['n_layers'], 
+                            dropout=additional_kwargs['dropout'], bidirectional=additional_kwargs['bidirectional'])
+        elif rnn_type == 'rnn':
+            self.rnn = nn.RNN(input_size=self.hparams['embedding_dim'], hidden_size=hidden_size, num_layers=additional_kwargs['n_layers'], 
+                            dropout=additional_kwargs['dropout'], bidirectional=additional_kwargs['bidirectional'])
+        elif rnn_type == 'gru':
+            self.rnn = nn.GRU(input_size=self.hparams['embedding_dim'], hidden_size=hidden_size, num_layers=additional_kwargs['n_layers'], 
+                            dropout=additional_kwargs['dropout'], bidirectional=additional_kwargs['bidirectional'])
         else:
-            self.rnn = nn.RNN(input_size=self.hparams['embedding_dim'], hidden_size=hidden_size, num_layers=additional_kwargs['n_layers'], dropout=additional_kwargs['dropout'])
-            
-        self.dropout = nn.Dropout(0.3)                
+            raise ValueError('Unknown recurrent layer type given!')    
+
+        # self.dropout = nn.Dropout(0.3)                
         self.fc = nn.Linear(in_features=hidden_size, out_features=additional_kwargs['output_size'])
-        #self.sig = nn.Sigmoid()
             
 
     def forward(self, sequence, lengths=None):
@@ -49,12 +55,12 @@ class RNNClassifier(nn.Module):
         if lengths is not None:
             embeds = pack_padded_sequence(embeds, lengths)
         
-        if self.hparams['use_lstm']:
+        if self.hparams['rnn_type'] == 'lstm':
             _, (h, _) = self.rnn(embeds)
         else:
             _, h  = self.rnn(embeds)
         
-        h = self.dropout(h)
+        # h = self.dropout(h)
         h = h.mean(0) # calculate mean across layers
         output = self.fc(h)
 

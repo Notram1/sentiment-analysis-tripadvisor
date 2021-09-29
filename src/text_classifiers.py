@@ -23,7 +23,13 @@ class RNNClassifier(nn.Module):
             **additional_kwargs
         }
         
-        self.embedding = nn.Embedding(self.hparams['num_embeddings'], self.hparams['embedding_dim'], padding_idx=0)
+        if additional_kwargs['pretrained_embedding'] is not None:
+            self.hparams['num_embeddings'], self.hparams['embedding_dim'] = additional_kwargs['pretrained_embedding'].size()
+            self.embedding = nn.Embedding(self.hparams['num_embeddings'], self.hparams['embedding_dim'], padding_idx=0)
+            self.embedding.load_state_dict({'weight': additional_kwargs['pretrained_embedding']})
+            self.embedding.weight.requires_grad = False
+        else:
+            self.embedding = nn.Embedding(self.hparams['num_embeddings'], self.hparams['embedding_dim'], padding_idx=0)
         
         if rnn_type == 'lstm':
             self.rnn = nn.LSTM(input_size=self.hparams['embedding_dim'], hidden_size=hidden_size, num_layers=additional_kwargs['n_layers'], 

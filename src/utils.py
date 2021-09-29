@@ -1,4 +1,8 @@
+import numpy as np
 import matplotlib.pyplot as plt
+import bcolz
+import pickle
+
 from wordcloud import WordCloud
 import torch
 
@@ -31,3 +35,24 @@ def calc_distr(combined_data):
     count['1'] = count['1']/sum
     count['2'] = count['2']/sum
     return count
+
+def parse_glove(glove_path: str, embedding_dim: int):
+    words = []
+    idx = 0
+    word2idx = {}
+    vectors = bcolz.carray(np.zeros(1), rootdir=f'{glove_path}/6B.{embedding_dim}.dat', mode='w')
+
+    with open(f'{glove_path}/glove.6B.{embedding_dim}d.txt', 'rb') as f:
+        for l in f:
+            line = l.decode().split()
+            word = line[0]
+            words.append(word)
+            word2idx[word] = idx
+            idx += 1
+            vect = np.array(line[1:]).astype(float)
+            vectors.append(vect)
+        
+    vectors = bcolz.carray(vectors[1:].reshape((400000, embedding_dim)), rootdir=f'{glove_path}/6B.{embedding_dim}.dat', mode='w')
+    vectors.flush()
+    pickle.dump(words, open(f'{glove_path}/6B.{embedding_dim}_words.pkl', 'wb'))
+    pickle.dump(word2idx, open(f'{glove_path}/6B.{embedding_dim}_idx.pkl', 'wb'))

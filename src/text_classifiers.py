@@ -43,7 +43,7 @@ class RNNClassifier(nn.Module):
         else:
             raise ValueError('Unknown recurrent layer type given!')    
 
-        self.dropout = nn.Dropout(additional_kwargs['dropout'])                
+        self.dropout = nn.Dropout(p=additional_kwargs['dropout'])                
         self.fc = nn.Linear(in_features=hidden_size*2 if additional_kwargs['bidirectional'] else hidden_size, out_features=additional_kwargs['output_size'])
             
 
@@ -61,7 +61,7 @@ class RNNClassifier(nn.Module):
         embeds = self.embedding(sequence)
         embeds = self.dropout(embeds)
         if lengths is not None:
-            embeds = pack_padded_sequence(embeds, lengths, enforce_sorted=True)
+            embeds = pack_padded_sequence(embeds, lengths, enforce_sorted=False)
         
         if self.hparams['rnn_type'] == 'lstm':
             _, (h, _) = self.rnn(embeds)

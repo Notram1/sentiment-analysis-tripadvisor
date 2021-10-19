@@ -29,6 +29,8 @@ To prevent overfitting, the training process takes advantage of the early stoppi
 
 The notebook also includes an option to use pretrained [GloVe](https://nlp.stanford.edu/projects/glove/) word embeddings. These were trained on much larger datasets, hence this could have a significant impact on the performance in sentiment analysis. In this case, the weights of the embedding layer are not trained. For every word in the vocabulary we assign the weights from GloVe if the word is present in the pre-trained embeddings. Otherwise, a random weight vector of the same length is created from a normal distribution with the same standard deviation as for the GloVe vectors.
 
+## Results
+
 Performance of models achieved with current parameters (using GloVe embeddings with a length of 300, if applicable):
 <table class="center">
     <tr>

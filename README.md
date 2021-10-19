@@ -4,6 +4,8 @@
 The dataset can be downloaded from: https://www.kaggle.com/andrewmvd/trip-advisor-hotel-reviews
 Save the _tripadvisor_hotel_reviews.csv_ file to the [data/](https://gitlab.com/Notram1/sentiment-analysis-tripadvisor/-/tree/master/data/) folder.
 
+If you would like to use pre-trained GloVe embeddings, they are available for download [here](https://nlp.stanford.edu/projects/glove/). We will use `Wikipedia 2014 + Gigaword 5` which is the smallest file ([`glove.6B.zip`](http://nlp.stanford.edu/data/wordvecs/glove.6B.zip)) with 822 MB. It was trained on a corpus of 6 billion tokens and contains a vocabulary of 400 thousand tokens. Download and unzip `glove.6B.zip` to the [data/](https://gitlab.com/Notram1/sentiment-analysis-tripadvisor/-/tree/master/data/) folder.
+
 ## Set Up Environment
 Requirements can be found in [docs/requirements.txt](https://gitlab.com/Notram1/sentiment-analysis-tripadvisor/-/tree/master/docs/requirements.txt)
 
